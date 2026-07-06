@@ -3,8 +3,8 @@ import { notFound, redirect } from "next/navigation"
 
 async function like(formData: FormData) {
   "use server"
-  const id = formData.get("id") as string
-  likeBlog(id)
+  const id = Number(formData.get("id"))
+  await likeBlog(id)
   redirect(`/blogs/${id}`)
 }
 
@@ -14,7 +14,7 @@ export default async function BlogPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const blog = getBlog(id)
+  const blog = await getBlog(Number(id))
 
   if (!blog) {
     notFound()

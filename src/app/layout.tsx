@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Blog App",
-  description: "Full Stack Open Next.js Chapter 2",
+  description: "Full Stack Open Next.js Chapter 3",
 }
 
 export default function RootLayout({
@@ -36,6 +36,9 @@ export default function RootLayout({
             </Link>
             <Link href="/blogs/new" className="text-sm text-zinc-600 hover:text-zinc-900">
               New Blog
+            </Link>
+            <Link href="/users" className="text-sm text-zinc-600 hover:text-zinc-900">
+              Users
             </Link>
           </div>
         </nav>

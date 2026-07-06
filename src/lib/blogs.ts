@@ -1,42 +1,67 @@
+import { db } from "./db"
+import { blogs, users } from "./schema"
+import { eq, sql, desc, like } from "drizzle-orm"
+
 export type Blog = {
-  id: string
+  id: number
   title: string
   author: string
   url: string
   likes: number
+  userId: number | null
 }
 
-let blogs: Blog[] = [
-  { id: "1", title: "React Patterns", author: "Dan Abramov", url: "https://react.dev", likes: 42 },
-  { id: "2", title: "Next.js Guide", author: "Lee Robinson", url: "https://nextjs.org", likes: 35 },
-  { id: "3", title: "TypeScript Handbook", author: "Anders Hejlsberg", url: "https://typescriptlang.org", likes: 28 },
-  { id: "4", title: "Tailwind CSS", author: "Adam Wathan", url: "https://tailwindcss.com", likes: 15 },
-]
-
-export function getBlogs(): Blog[] {
-  return blogs
+export type User = {
+  id: number
+  name: string
+  email: string
 }
 
-export function getBlog(id: string): Blog | undefined {
-  return blogs.find((b) => b.id === id)
+export async function getBlogs(): Promise<Blog[]> {
+  return db.select().from(blogs).orderBy(desc(blogs.likes))
 }
 
-export function addBlog(title: string, author: string, url: string): Blog {
-  const blog: Blog = {
-    id: String(Date.now()),
-    title,
-    author,
-    url,
-    likes: 0,
-  }
-  blogs = [blog, ...blogs]
-  return blog
+export async function getBlog(id: number): Promise<Blog | undefined> {
+  const rows = await db.select().from(blogs).where(eq(blogs.id, id)).limit(1)
+  return rows[0]
 }
 
-export function likeBlog(id: string): Blog | undefined {
-  const blog = blogs.find((b) => b.id === id)
-  if (blog) {
-    blog.likes += 1
-  }
-  return blog
+export async function getBlogsFiltered(filter: string): Promise<Blog[]> {
+  return db
+    .select()
+    .from(blogs)
+    .where(like(blogs.title, `%${filter}%`))
+    .orderBy(desc(blogs.likes))
+}
+
+export async function addBlog(title: string, author: string, url: string): Promise<Blog> {
+  const rows = await db
+    .insert(blogs)
+    .values({ title, author, url, likes: 0 })
+    .returning()
+  return rows[0]
+}
+
+export async function likeBlog(id: number): Promise<void> {
+  await db
+    .update(blogs)
+    .set({ likes: sql`${blogs.likes} + 1` })
+    .where(eq(blogs.id, id))
+}
+
+export async function getUsers(): Promise<User[]> {
+  return db.select().from(users)
+}
+
+export async function getUser(id: number): Promise<User | undefined> {
+  const rows = await db.select().from(users).where(eq(users.id, id)).limit(1)
+  return rows[0]
+}
+
+export async function getUserBlogs(userId: number): Promise<Blog[]> {
+  return db
+    .select()
+    .from(blogs)
+    .where(eq(blogs.userId, userId))
+    .orderBy(desc(blogs.likes))
 }

@@ -1,4 +1,4 @@
-import { getBlogs } from "@/lib/blogs"
+import { getBlogs, getBlogsFiltered } from "@/lib/blogs"
 import Link from "next/link"
 
 export default async function BlogsPage({
@@ -7,15 +7,7 @@ export default async function BlogsPage({
   searchParams: Promise<{ filter?: string }>
 }) {
   const { filter } = await searchParams
-  let blogs = getBlogs()
-
-  if (filter) {
-    blogs = blogs.filter((b) =>
-      b.title.toLowerCase().includes(filter.toLowerCase())
-    )
-  }
-
-  blogs.sort((a, b) => b.likes - a.likes)
+  const blogs = filter ? await getBlogsFiltered(filter) : await getBlogs()
 
   return (
     <div>
