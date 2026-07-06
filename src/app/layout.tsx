@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import "./globals.css"
 import Link from "next/link"
+import { auth } from "@/lib/auth"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,14 +16,16 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Blog App",
-  description: "Full Stack Open Next.js Chapter 3",
+  description: "Full Stack Open Next.js",
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const session = await auth()
+
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
       <body className="min-h-dvh flex flex-col font-sans">
@@ -32,14 +35,35 @@ export default function RootLayout({
               Blog App
             </Link>
             <Link href="/blogs" className="text-sm text-zinc-600 hover:text-zinc-900">
-              Blogs
-            </Link>
-            <Link href="/blogs/new" className="text-sm text-zinc-600 hover:text-zinc-900">
-              New Blog
+              blogs
             </Link>
             <Link href="/users" className="text-sm text-zinc-600 hover:text-zinc-900">
-              Users
+              users
             </Link>
+            {session?.user ? (
+              <>
+                <Link href="/me" className="text-sm text-zinc-600 hover:text-zinc-900">
+                  me
+                </Link>
+                <form action="/api/auth/signout" method="POST" className="ml-auto">
+                  <button
+                    type="submit"
+                    className="text-sm text-zinc-600 hover:text-zinc-900"
+                  >
+                    logout
+                  </button>
+                </form>
+              </>
+            ) : (
+              <div className="ml-auto flex gap-4">
+                <Link href="/login" className="text-sm text-zinc-600 hover:text-zinc-900">
+                  login
+                </Link>
+                <Link href="/register" className="text-sm text-zinc-600 hover:text-zinc-900">
+                  register
+                </Link>
+              </div>
+            )}
           </div>
         </nav>
         <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8">{children}</main>

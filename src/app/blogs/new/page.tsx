@@ -1,13 +1,16 @@
 import { redirect } from "next/navigation"
 import { addBlog } from "@/lib/blogs"
+import { auth } from "@/lib/auth"
 
 async function createBlog(formData: FormData) {
   "use server"
+  const session = await auth()
   const title = formData.get("title") as string
   const author = formData.get("author") as string
   const url = formData.get("url") as string
-  await addBlog(title, author, url)
-  redirect("/blogs")
+  const userId = session?.user?.id ? Number(session.user.id) : undefined
+  await addBlog(title, author, url, userId)
+  redirect("/blogs?notification=Blog+created+successfully")
 }
 
 export default function NewBlogPage() {
@@ -51,6 +54,7 @@ export default function NewBlogPage() {
         </div>
         <button
           type="submit"
+          data-testid="create-blog-button"
           className="rounded-lg bg-zinc-900 px-6 py-2 text-sm font-medium text-white hover:bg-zinc-700"
         >
           Create

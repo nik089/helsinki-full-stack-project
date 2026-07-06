@@ -1,14 +1,17 @@
 import { db } from "./db"
 import { users, blogs } from "./schema"
+import bcrypt from "bcryptjs"
 
 async function seed() {
+  const passwordHash = await bcrypt.hash("password123", 10)
+
   const insertedUsers = await db
     .insert(users)
     .values([
-      { name: "Dan Abramov", email: "dan@react.dev" },
-      { name: "Lee Robinson", email: "lee@nextjs.org" },
-      { name: "Anders Hejlsberg", email: "anders@typescriptlang.org" },
-      { name: "Adam Wathan", email: "adam@tailwindcss.com" },
+      { username: "dan", name: "Dan Abramov", email: "dan@react.dev", passwordHash },
+      { username: "lee", name: "Lee Robinson", email: "lee@nextjs.org", passwordHash },
+      { username: "anders", name: "Anders Hejlsberg", email: "anders@typescriptlang.org", passwordHash },
+      { username: "adam", name: "Adam Wathan", email: "adam@tailwindcss.com", passwordHash },
     ])
     .returning()
 
